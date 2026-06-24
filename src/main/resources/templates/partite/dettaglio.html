@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6">
+<head th:replace="~{fragments/layout :: head('Partita')}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="flex-grow-1 container my-4">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/tornei}">Tornei</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/tornei/{id}(id=${partita.torneo.id})}"
+                   th:text="${partita.torneo.nome}"></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/partite/torneo/{id}(id=${partita.torneo.id})}">Calendario</a>
+            </li>
+            <li class="breadcrumb-item active">Partita</li>
+        </ol>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════
+         RISULTATO / SCHEDA PARTITA
+         ═══════════════════════════════════════════ -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold" th:text="${partita.torneo.nome}"></span>
+            <span th:class="${partita.stato.name() == 'PLAYED' ?
+                'badge bg-light text-success' :
+                (partita.stato.name() == 'CANCELLED' ? 'badge bg-danger' : 'badge bg-warning text-dark')}"
+                  th:text="${partita.stato.name() == 'PLAYED' ? 'Giocata' :
+                            (partita.stato.name() == 'CANCELLED' ? 'Annullata' : 'In programma')}">
+            </span>
+        </div>
+        <div class="card-body py-4">
+
+            <!-- Squadre e risultato -->
+            <div class="row align-items-center text-center g-3">
+                <div class="col-5">
+                    <i class="bi bi-shield-fill text-success display-6 d-block mb-2"></i>
+                    <h4 class="fw-bold" th:text="${partita.squadraCasa.nome}"></h4>
+                    <span class="badge bg-secondary">Casa</span>
+                </div>
+
+                <div class="col-2">
+                    <div th:if="${partita.stato.name() == 'PLAYED'}"
+                         class="display-4 fw-bold text-success">
+                        <span th:text="${partita.goalsHome}"></span>
+                        <span class="text-muted mx-1">-</span>
+                        <span th:text="${partita.goalsAway}"></span>
+                    </div>
+                    <div th:unless="${partita.stato.name() == 'PLAYED'}"
+                         class="display-6 text-muted fw-light">vs</div>
+                </div>
+
+                <div class="col-5">
+                    <i class="bi bi-shield-fill text-secondary display-6 d-block mb-2"></i>
+                    <h4 class="fw-bold" th:text="${partita.squadraOspite.nome}"></h4>
+                    <span class="badge bg-secondary">Ospite</span>
+                </div>
+            </div>
+
+            <!-- Info aggiuntive -->
+            <hr class="my-3"/>
+            <div class="row text-center text-muted small g-2">
+                <div class="col-sm-4">
+                    <i class="bi bi-calendar-event text-success d-block fs-5 mb-1"></i>
+                    <span th:text="${partita.dataOra != null ?
+                        #temporals.format(partita.dataOra,'dd/MM/yyyy HH:mm') : 'Data N/D'}"></span>
+                </div>
+                <div class="col-sm-4">
+                    <i class="bi bi-geo-alt-fill text-success d-block fs-5 mb-1"></i>
+                    <span th:text="${partita.luogo != null ? partita.luogo : 'Luogo N/D'}"></span>
+                </div>
+                <div class="col-sm-4">
+                    <i class="bi bi-person-badge text-success d-block fs-5 mb-1"></i>
+                    <span th:text="${partita.arbitro != null ?
+                        partita.arbitro.cognome + ' ' + partita.arbitro.nome : 'Arbitro N/D'}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Azioni admin -->
+        <div class="card-footer bg-white d-flex gap-2 flex-wrap" sec:authorize="hasRole('ADMIN')">
+
+            <!-- Inserisci / aggiorna risultato -->
+            <button class="btn btn-success btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#modalRisultato">
+                <i class="bi bi-pencil-square"></i> Inserisci Risultato
+            </button>
+
+            <!-- Elimina partita -->
+            <form th:action="@{/partite/{id}/elimina(id=${partita.id})}"
+                  method="post"
+                  onsubmit="return confirm('Eliminare definitivamente questa partita?')">
+                <input type="hidden" name="torneoId" th:value="${partita.torneo.id}"/>
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="bi bi-trash"></i> Elimina Partita
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SEZIONE COMMENTI (requisito 4.2)
+         ═══════════════════════════════════════════ -->
+    <h4 class="section-title mb-3">
+        <i class="bi bi-chat-dots-fill text-success"></i>
+        Commenti
+        <span class="badge bg-success ms-2" th:text="${partita.commenti.size()}"></span>
+    </h4>
+
+    <!-- Form aggiungi commento (solo utenti autenticati) -->
+    <div sec:authorize="isAuthenticated()" class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h6 class="fw-semibold mb-3">
+                <i class="bi bi-plus-circle text-success"></i> Aggiungi un commento
+            </h6>
+            <form th:action="@{/partite/{id}/commenti/aggiungi(id=${partita.id})}"
+                  method="post">
+                <div class="mb-3">
+                    <textarea class="form-control" name="testo" rows="3"
+                              placeholder="Scrivi il tuo commento sulla partita..."
+                              required maxlength="1000"></textarea>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-send"></i> Invia Commento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Invito al login per utenti anonimi -->
+    <div sec:authorize="!isAuthenticated()" class="alert alert-info mb-4">
+        <i class="bi bi-info-circle"></i>
+        <a th:href="@{/auth/login}">Accedi</a> o
+        <a th:href="@{/auth/registrazione}">registrati</a>
+        per lasciare un commento.
+    </div>
+
+    <!-- Lista commenti -->
+    <div th:if="${partita.commenti.empty}" class="text-muted fst-italic text-center py-3">
+        Nessun commento ancora. Sii il primo!
+    </div>
+
+    <div class="d-flex flex-column gap-3" th:unless="${partita.commenti.empty}">
+        <div class="card shadow-sm" th:each="commento : ${partita.commenti}">
+            <div class="card-body">
+
+                <!-- Intestazione commento -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <i class="bi bi-person-circle text-success me-2"></i>
+                        <strong th:text="${commento.utente.username}"></strong>
+                        <span class="text-muted small ms-2"
+                              th:text="${commento.dataCreazione != null ?
+                                #temporals.format(commento.dataCreazione,'dd/MM/yyyy HH:mm') : ''}">
+                        </span>
+                    </div>
+
+                    <!-- Azioni sul commento: visibili solo all'autore -->
+                    <div sec:authorize="isAuthenticated()"
+                         th:if="${commento.utente.username == utenteCorrente}"
+                         class="d-flex gap-1">
+
+                        <!-- Pulsante Modifica: apre l'area di editing inline -->
+                        <button class="btn btn-warning btn-sm"
+                                th:data-id="${commento.id}"
+                                onclick="toggleEdit(this)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+
+                        <!-- Pulsante Elimina -->
+                        <form th:action="@{/partite/commenti/{id}/elimina(id=${commento.id})}"
+                              method="post"
+                              onsubmit="return confirm('Eliminare il commento?')">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Testo commento (visualizzazione) -->
+                <p class="mb-0 commento-testo" th:text="${commento.testo}"
+                   th:id="'testo-' + ${commento.id}"></p>
+
+                <!-- Form di modifica inline (nascosto di default) -->
+                <form th:action="@{/partite/commenti/{id}/modifica(id=${commento.id})}"
+                      method="post"
+                      th:id="'form-edit-' + ${commento.id}"
+                      class="mt-2 d-none">
+                    <input type="hidden" name="partitaId" th:value="${partita.id}"/>
+                    <textarea class="form-control mb-2" name="testo" rows="3"
+                              th:text="${commento.testo}" required></textarea>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-secondary btn-sm"
+                                th:data-id="${commento.id}"
+                                onclick="toggleEdit(this)">
+                            Annulla
+                        </button>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-check-lg"></i> Salva
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- ═══════════════════════════════════
+     MODAL: Inserimento Risultato
+     ═══════════════════════════════════ -->
+<div class="modal fade" id="modalRisultato" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Inserisci Risultato</h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/partite/{id}/risultato(id=${partita.id})}" method="post">
+                <div class="modal-body">
+                    <div class="row g-3 align-items-center text-center">
+                        <div class="col-5">
+                            <label class="form-label fw-semibold small"
+                                   th:text="${partita.squadraCasa.nome}"></label>
+                            <input type="number" class="form-control form-control-lg text-center
+                                   fw-bold" name="goalsHome"
+                                   th:value="${partita.goalsHome}" min="0" max="99" required/>
+                        </div>
+                        <div class="col-2 pt-4 text-muted fw-bold fs-4">-</div>
+                        <div class="col-5">
+                            <label class="form-label fw-semibold small"
+                                   th:text="${partita.squadraOspite.nome}"></label>
+                            <input type="number" class="form-control form-control-lg text-center
+                                   fw-bold" name="goalsAway"
+                                   th:value="${partita.goalsAway}" min="0" max="99" required/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i> Conferma
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<!-- Script per editing inline dei commenti -->
+<script>
+function toggleEdit(btn) {
+    const id   = btn.dataset.id;
+    const form = document.getElementById('form-edit-' + id);
+    const text = document.getElementById('testo-' + id);
+    const hidden = form.classList.contains('d-none');
+    form.classList.toggle('d-none', !hidden);
+    text.classList.toggle('d-none',  hidden);
+}
+</script>
+
+</body>
+</html>

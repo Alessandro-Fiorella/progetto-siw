@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Squadra')}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="flex-grow-1 container my-4" style="max-width:600px">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/squadre}">Squadre</a></li>
+            <li class="breadcrumb-item active"
+                th:text="${squadra.id != null ? 'Modifica' : 'Nuova Squadra'}"></li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"
+                th:text="${squadra.id != null ? 'Modifica Squadra' : 'Crea Nuova Squadra'}"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="${squadra.id != null ?
+                              '/squadre/' + squadra.id + '/modifica' :
+                              '/squadre/nuova'}"
+                  th:object="${squadra}" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nome Squadra *</label>
+                    <input type="text" class="form-control" th:field="*{nome}"
+                           placeholder="es. FC Virtus Roma" required/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Citta</label>
+                    <input type="text" class="form-control" th:field="*{citta}"
+                           placeholder="es. Roma"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Anno di Fondazione</label>
+                    <input type="number" class="form-control" th:field="*{annoFondazione}"
+                           min="1800" max="2100" placeholder="es. 1995"/>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a th:href="@{/squadre}" class="btn btn-secondary">Annulla</a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i>
+                        <span th:text="${squadra.id != null ? 'Salva Modifiche' : 'Crea Squadra'}"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

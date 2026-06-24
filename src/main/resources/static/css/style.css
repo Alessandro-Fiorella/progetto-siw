@@ -1,0 +1,190 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTY TOURNAMENTS — CSS Personalizzato
+   Tema: viola, responsive, card e badge dedicati
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --tc-purple:       #6d28d9;
+    --tc-purple-dark:  #4c1d95;
+    --tc-purple-light: #f3e8ff;
+    --tc-gold:         #f0a500;
+
+    /* Override delle variabili "success" di Bootstrap 5.3:
+       in questo modo TUTTE le utility .text-success, .bg-success,
+       .btn-success, .table-success, .border-success, .alert-success
+       ecc. diventano viola automaticamente, senza dover toccare
+       ogni singolo template HTML. */
+    --bs-success:      #6d28d9;
+    --bs-success-rgb:  109, 40, 217;
+}
+
+body {
+    background-color: #f8f7fa;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+main {
+    min-height: 60vh;
+}
+
+/* ── Navbar ────────────────────────────────────────────────────── */
+
+.navbar.bg-success {
+    background: linear-gradient(135deg, var(--tc-purple) 0%, var(--tc-purple-dark) 100%) !important;
+}
+
+.navbar-brand {
+    letter-spacing: 0.3px;
+}
+
+/* ── Hero banner (home page) ──────────────────────────────────── */
+
+.hero-banner {
+    background: linear-gradient(135deg, var(--tc-purple) 0%, var(--tc-purple-dark) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-banner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.06) 0, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 0, transparent 40%);
+    pointer-events: none;
+}
+
+/* ── Section titles ───────────────────────────────────────────── */
+
+.section-title {
+    font-weight: 700;
+    color: #281f33;
+    border-left: 4px solid var(--tc-purple);
+    padding-left: 0.6rem;
+}
+
+/* ── Card animations ──────────────────────────────────────────── */
+
+.torneo-card,
+.squadra-card,
+.stat-card,
+.partita-card {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+.torneo-card:hover,
+.squadra-card:hover,
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.75rem 1.5rem rgba(109,40,217,0.16) !important;
+}
+
+.partita-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08) !important;
+}
+
+/* ── Risultato partita ────────────────────────────────────────── */
+
+.score-box {
+    letter-spacing: 1px;
+    min-width: 90px;
+}
+
+/* ── Bottoni principali (override colore Bootstrap "success") ──── */
+
+.btn-success {
+    background-color: var(--tc-purple);
+    border-color: var(--tc-purple);
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: var(--tc-purple-dark);
+    border-color: var(--tc-purple-dark);
+}
+
+.btn-outline-success {
+    color: var(--tc-purple);
+    border-color: var(--tc-purple);
+}
+
+.btn-outline-success:hover {
+    background-color: var(--tc-purple);
+    border-color: var(--tc-purple);
+}
+
+/* ── Badge e tabelle ───────────────────────────────────────────── */
+
+.bg-success {
+    background-color: var(--tc-purple) !important;
+}
+
+.table-success {
+    --bs-table-bg: var(--tc-purple-light);
+}
+
+.classifica-table thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.classifica-table tbody tr:first-child td {
+    border-top: 2px solid var(--tc-gold);
+}
+
+/* ── Commenti ──────────────────────────────────────────────────── */
+
+.commento-testo {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ── Breadcrumb ────────────────────────────────────────────────── */
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    font-size: 0.9rem;
+}
+
+/* ── Footer ────────────────────────────────────────────────────── */
+
+.footer {
+    border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+/* ── Form ──────────────────────────────────────────────────────── */
+
+.form-label {
+    color: #352a40;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--tc-purple);
+    box-shadow: 0 0 0 0.2rem rgba(109,40,217,0.18);
+}
+
+/* ── Responsive tweaks ─────────────────────────────────────────── */
+
+@media (max-width: 576px) {
+    .hero-banner h1 {
+        font-size: 1.8rem;
+    }
+    .score-box {
+        font-size: 1.1rem;
+        min-width: 70px;
+    }
+    .section-title {
+        font-size: 1.2rem;
+    }
+}
+
+/* ── Spinner colore tema ───────────────────────────────────────── */
+
+.spinner-border.text-success {
+    color: var(--tc-purple) !important;
+}

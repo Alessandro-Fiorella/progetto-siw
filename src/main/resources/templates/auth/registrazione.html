@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Registrazione')}"></head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+    <div class="card shadow" style="width:100%; max-width:440px">
+
+        <div class="card-header bg-success text-white text-center py-3">
+            <i class="bi bi-person-plus display-6 d-block mb-1"></i>
+            <h4 class="mb-0 fw-bold">Crea Account</h4>
+        </div>
+
+        <div class="card-body px-4 py-4">
+
+            <div th:if="${errorMsg}"
+                 class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${errorMsg}"></span>
+            </div>
+
+            <form th:action="@{/auth/registrazione}" method="post">
+
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-semibold">Username *</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-person text-success"></i>
+                        </span>
+                        <input type="text" id="username" name="username"
+                               class="form-control" placeholder="Scegli uno username"
+                               autofocus required minlength="3" maxlength="50"/>
+                    </div>
+                    <div class="form-text">Minimo 3 caratteri.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label fw-semibold">Password *</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-lock text-success"></i>
+                        </span>
+                        <input type="password" id="password" name="password"
+                               class="form-control" placeholder="Scegli una password"
+                               required minlength="6"/>
+                    </div>
+                    <div class="form-text">Minimo 6 caratteri.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirmPassword" class="form-label fw-semibold">
+                        Conferma Password *
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-lock-fill text-success"></i>
+                        </span>
+                        <input type="password" id="confirmPassword" name="confirmPassword"
+                               class="form-control" placeholder="Ripeti la password"
+                               required minlength="6"/>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-semibold py-2">
+                    <i class="bi bi-person-check"></i> Crea Account
+                </button>
+            </form>
+        </div>
+
+        <div class="card-footer text-center text-muted py-3 bg-white">
+            Hai gia un account?
+            <a th:href="@{/auth/login}" class="text-success fw-semibold">Accedi</a>
+        </div>
+    </div>
+</main>
+
+<!-- Validazione client-side: controlla che le due password coincidano -->
+<script>
+document.querySelector('form').addEventListener('submit', function (e) {
+    const pwd  = document.getElementById('password').value;
+    const conf = document.getElementById('confirmPassword').value;
+    if (pwd !== conf) {
+        e.preventDefault();
+        alert('Le password non corrispondono.');
+    }
+});
+</script>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

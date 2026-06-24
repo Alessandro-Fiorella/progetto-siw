@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nuova Partita')}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="flex-grow-1 container my-4" style="max-width:680px">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/tornei}">Tornei</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/tornei/{id}(id=${torneo.id})}" th:text="${torneo.nome}"></a>
+            </li>
+            <li class="breadcrumb-item active">Nuova Partita</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-plus-circle"></i>
+                Registra Partita &mdash; <span th:text="${torneo.nome}"></span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/partite/nuova}" method="post">
+                <input type="hidden" name="torneoId" th:value="${torneo.id}"/>
+
+                <!-- Squadre -->
+                <div class="row g-3 mb-3 align-items-end">
+                    <div class="col-5">
+                        <label class="form-label fw-semibold">Squadra Casa *</label>
+                        <select class="form-select" name="squadraCasaId" required>
+                            <option value="">-- Seleziona --</option>
+                            <option th:each="s : ${squadre}"
+                                    th:value="${s.id}"
+                                    th:text="${s.nome}"></option>
+                        </select>
+                    </div>
+                    <div class="col-2 text-center pb-2 fw-bold text-muted fs-4">vs</div>
+                    <div class="col-5">
+                        <label class="form-label fw-semibold">Squadra Ospite *</label>
+                        <select class="form-select" name="squadraOspiteId" required>
+                            <option value="">-- Seleziona --</option>
+                            <option th:each="s : ${squadre}"
+                                    th:value="${s.id}"
+                                    th:text="${s.nome}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Data, luogo, arbitro -->
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold">Data e Ora</label>
+                        <input type="datetime-local" class="form-control" name="dataOra"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label fw-semibold">Luogo</label>
+                        <input type="text" class="form-control" name="luogo"
+                               placeholder="es. Stadio Olimpico"/>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Arbitro *</label>
+                    <select class="form-select" name="arbitroId" required>
+                        <option value="">-- Seleziona arbitro --</option>
+                        <option th:each="a : ${arbitri}"
+                                th:value="${a.id}"
+                                th:text="${a.cognome + ' ' + a.nome + ' (' + a.codiceArbitrale + ')'}">
+                        </option>
+                    </select>
+                    <div class="form-text">
+                        <a th:href="@{/admin/arbitri/nuovo}" target="_blank">
+                            <i class="bi bi-plus-circle"></i> Aggiungi un nuovo arbitro
+                        </a>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a th:href="@{/partite/torneo/{id}(id=${torneo.id})}"
+                       class="btn btn-secondary">Annulla</a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg"></i> Registra Partita
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard Admin')}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="flex-grow-1 container my-4">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-gear-fill text-success display-6"></i>
+        <div>
+            <h1 class="fw-bold mb-0">Dashboard Admin</h1>
+            <small class="text-muted">Gestione completa del sistema</small>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════
+         CARD STATISTICHE RAPIDE
+         ═══════════════════════════ -->
+    <div class="row g-3 mb-5">
+        <div class="col-sm-6 col-md-3">
+            <div class="card text-center shadow-sm border-0 stat-card">
+                <div class="card-body py-4">
+                    <i class="bi bi-trophy-fill text-success display-5 mb-2"></i>
+                    <h3 class="fw-bold mb-0" th:text="${tornei.size()}">0</h3>
+                    <small class="text-muted">Tornei</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card text-center shadow-sm border-0 stat-card">
+                <div class="card-body py-4">
+                    <i class="bi bi-people-fill text-primary display-5 mb-2"></i>
+                    <h3 class="fw-bold mb-0">
+                        <a th:href="@{/squadre}" class="text-dark text-decoration-none">
+                            <i class="bi bi-arrow-right-circle-fill small"></i>
+                        </a>
+                    </h3>
+                    <small class="text-muted">Squadre</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card text-center shadow-sm border-0 stat-card">
+                <div class="card-body py-4">
+                    <i class="bi bi-person-badge-fill text-warning display-5 mb-2"></i>
+                    <h3 class="fw-bold mb-0" th:text="${arbitri.size()}">0</h3>
+                    <small class="text-muted">Arbitri</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card text-center shadow-sm border-0 stat-card">
+                <div class="card-body py-4">
+                    <i class="bi bi-calendar-check-fill text-danger display-5 mb-2"></i>
+                    <h3 class="fw-bold mb-0">
+                        <span class="small text-muted">Gestisci</span>
+                    </h3>
+                    <small class="text-muted">Partite</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════
+         SEZIONE TORNEI
+         ═══════════════════════════ -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-trophy-fill text-success"></i> Tornei
+        </h4>
+        <a th:href="@{/tornei/nuovo}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-circle"></i> Nuovo Torneo
+        </a>
+    </div>
+
+    <div th:if="${tornei.empty}" class="text-muted fst-italic mb-4">
+        Nessun torneo. Creane uno!
+    </div>
+
+    <div class="table-responsive mb-5" th:unless="${tornei.empty}">
+        <table class="table table-hover align-middle">
+            <thead class="table-success">
+                <tr>
+                    <th>Nome</th>
+                    <th>Anno</th>
+                    <th class="text-center">Squadre</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="torneo : ${tornei}">
+                    <td>
+                        <a th:href="@{/tornei/{id}(id=${torneo.id})}"
+                           class="fw-semibold text-decoration-none text-dark"
+                           th:text="${torneo.nome}"></a>
+                    </td>
+                    <td th:text="${torneo.anno}"></td>
+                    <td class="text-center">
+                        <span class="badge bg-success"
+                              th:text="${torneo.squadre.size()}"></span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <a th:href="@{/tornei/{id}(id=${torneo.id})}"
+                               class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a th:href="@{/tornei/{id}/modifica(id=${torneo.id})}"
+                               class="btn btn-warning btn-sm">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a th:href="@{/tornei/{id}/squadre/aggiungi(id=${torneo.id})}"
+                               class="btn btn-primary btn-sm"
+                               title="Aggiungi squadra">
+                                <i class="bi bi-person-plus"></i>
+                            </a>
+                            <a th:href="@{/partite/nuova(torneoId=${torneo.id})}"
+                               class="btn btn-secondary btn-sm"
+                               title="Nuova partita">
+                                <i class="bi bi-plus-circle"></i>
+                            </a>
+                            <a th:href="@{/partite/torneo/{id}(id=${torneo.id})}"
+                               class="btn btn-outline-secondary btn-sm"
+                               title="Calendario">
+                                <i class="bi bi-calendar3"></i>
+                            </a>
+                            <a th:href="@{/classifica/torneo/{id}(id=${torneo.id})}"
+                               class="btn btn-outline-success btn-sm"
+                               title="Classifica">
+                                <i class="bi bi-list-ol"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ═══════════════════════════
+         SEZIONE SQUADRE
+         ═══════════════════════════ -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-people-fill text-primary"></i> Squadre
+        </h4>
+        <a th:href="@{/squadre/nuova}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Nuova Squadra
+        </a>
+    </div>
+    <p class="text-muted small mb-5">
+        Gestisci le squadre dalla pagina
+        <a th:href="@{/squadre}">elenco squadre</a>
+        dove puoi modificare, eliminare e aggiungere giocatori.
+    </p>
+
+    <!-- ═══════════════════════════
+         SEZIONE ARBITRI
+         ═══════════════════════════ -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="section-title mb-0">
+            <i class="bi bi-person-badge-fill text-warning"></i> Arbitri
+        </h4>
+        <a th:href="@{/admin/arbitri/nuovo}" class="btn btn-warning btn-sm">
+            <i class="bi bi-plus-circle"></i> Nuovo Arbitro
+        </a>
+    </div>
+
+    <div th:if="${arbitri.empty}" class="text-muted fst-italic mb-4">
+        Nessun arbitro registrato.
+    </div>
+
+    <div class="table-responsive" th:unless="${arbitri.empty}">
+        <table class="table table-hover align-middle">
+            <thead class="table-warning">
+                <tr>
+                    <th>Codice</th>
+                    <th>Cognome e Nome</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="arbitro : ${arbitri}">
+                    <td>
+                        <span class="badge bg-secondary font-monospace"
+                              th:text="${arbitro.codiceArbitrale}"></span>
+                    </td>
+                    <td th:text="${arbitro.cognome + ' ' + arbitro.nome}"></td>
+                    <td>
+                        <a th:href="@{/admin/arbitri/{id}/modifica(id=${arbitro.id})}"
+                           class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil"></i> Modifica
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

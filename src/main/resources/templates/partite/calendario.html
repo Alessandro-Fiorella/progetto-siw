@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6">
+<head th:replace="~{fragments/layout :: head('Calendario')}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="flex-grow-1 container my-4">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/tornei}">Tornei</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/tornei/{id}(id=${torneo.id})}" th:text="${torneo.nome}"></a>
+            </li>
+            <li class="breadcrumb-item active">Calendario</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 class="section-title mb-0">
+            <i class="bi bi-calendar3 text-success"></i>
+            Calendario &mdash; <span th:text="${torneo.nome}"></span>
+        </h2>
+        <div class="d-flex gap-2">
+            <a th:href="@{/classifica/torneo/{id}(id=${torneo.id})}"
+               class="btn btn-outline-success btn-sm">
+                <i class="bi bi-list-ol"></i> Classifica
+            </a>
+            <a th:href="@{/partite/nuova(torneoId=${torneo.id})}"
+               sec:authorize="hasRole('ADMIN')"
+               class="btn btn-success btn-sm">
+                <i class="bi bi-plus-circle"></i> Nuova Partita
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${partite.empty}" class="text-center text-muted py-5">
+        <i class="bi bi-calendar-x display-1"></i>
+        <p class="mt-3 fs-5">Nessuna partita in programma.</p>
+    </div>
+
+    <div class="row g-3" th:unless="${partite.empty}">
+        <div class="col-12" th:each="partita : ${partite}">
+            <div class="card shadow-sm partita-card">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+
+                        <!-- Data e luogo -->
+                        <div class="col-md-2 text-muted small text-center mb-2 mb-md-0">
+                            <i class="bi bi-calendar-event text-success d-block fs-5"></i>
+                            <span th:text="${partita.dataOra != null ?
+                                #temporals.format(partita.dataOra,'dd/MM/yyyy') : 'N/D'}"></span>
+                            <br/>
+                            <span th:text="${partita.dataOra != null ?
+                                #temporals.format(partita.dataOra,'HH:mm') : ''}"></span>
+                            <div class="text-truncate" th:text="${partita.luogo != null ? partita.luogo : ''}"></div>
+                        </div>
+
+                        <!-- Squadre e risultato -->
+                        <div class="col-md-7 text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-3">
+                                <span class="fw-bold fs-5" th:text="${partita.squadraCasa.nome}"></span>
+
+                                <!-- Risultato se giocata, altrimenti VS -->
+                                <div th:if="${partita.stato.name() == 'PLAYED'}"
+                                     class="score-box px-3 py-1 rounded text-white bg-success fw-bold fs-4">
+                                    <span th:text="${partita.goalsHome}"></span>
+                                    &nbsp;-&nbsp;
+                                    <span th:text="${partita.goalsAway}"></span>
+                                </div>
+                                <div th:unless="${partita.stato.name() == 'PLAYED'}"
+                                     class="text-muted fw-semibold fs-5">vs</div>
+
+                                <span class="fw-bold fs-5" th:text="${partita.squadraOspite.nome}"></span>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <i class="bi bi-person-badge"></i>
+                                <span th:text="${partita.arbitro != null ?
+                                    partita.arbitro.cognome + ' ' + partita.arbitro.nome : 'Arbitro N/D'}"></span>
+                            </div>
+                        </div>
+
+                        <!-- Stato e azioni -->
+                        <div class="col-md-3 text-end mt-2 mt-md-0">
+                            <span th:class="${partita.stato.name() == 'PLAYED' ?
+                                'badge bg-success mb-2' :
+                                (partita.stato.name() == 'CANCELLED' ? 'badge bg-danger mb-2' : 'badge bg-warning text-dark mb-2')}"
+                                  th:text="${partita.stato.name() == 'PLAYED' ? 'Giocata' :
+                                           (partita.stato.name() == 'CANCELLED' ? 'Annullata' : 'In programma')}">
+                            </span>
+                            <div class="d-flex gap-1 justify-content-end flex-wrap">
+                                <a th:href="@{/partite/{id}(id=${partita.id})}"
+                                   class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-eye"></i> Dettaglio
+                                </a>
+                                <div sec:authorize="hasRole('ADMIN')" class="d-flex gap-1">
+                                    <form th:action="@{/partite/{id}/elimina(id=${partita.id})}"
+                                          method="post"
+                                          onsubmit="return confirm('Eliminare questa partita?')">
+                                        <input type="hidden" name="torneoId" th:value="${torneo.id}"/>
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

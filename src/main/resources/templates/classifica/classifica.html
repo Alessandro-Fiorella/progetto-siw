@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6">
+<head th:replace="~{fragments/layout :: head('Classifica')}"></head>
+<body class="d-flex flex-column min-vh-100">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow-1 container my-4">
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Breadcrumb (Thymeleaf) -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/tornei}">Tornei</a></li>
+            <li class="breadcrumb-item">
+                <a th:href="@{/tornei/{id}(id=${torneo.id})}"
+                   th:text="${torneo.nome}"></a>
+            </li>
+            <li class="breadcrumb-item active">Classifica</li>
+        </ol>
+    </nav>
+
+    <!-- Intestazione (Thymeleaf) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-list-ol text-success"></i>
+                Classifica
+            </h2>
+            <span class="text-muted" th:text="${torneo.nome + ' ' + torneo.anno}"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/partite/torneo/{id}(id=${torneo.id})}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-calendar3"></i> Calendario
+            </a>
+            <a th:href="@{/tornei/{id}(id=${torneo.id})}"
+               class="btn btn-outline-success btn-sm">
+                <i class="bi bi-trophy"></i> Torneo
+            </a>
+        </div>
+    </div>
+
+    <!--
+        ═══════════════════════════════════════════════════════════
+        COMPONENTE REACT — mount point
+        Il div #classifica-root viene popolato dal componente React
+        sottostante che fetcha /api/tornei/{id}/classifica
+        ═══════════════════════════════════════════════════════════
+    -->
+    <div id="classifica-root">
+        <!-- Placeholder visibile finché React non monta -->
+        <div class="text-center py-5 text-muted">
+            <div class="spinner-border text-success mb-3" role="status">
+                <span class="visually-hidden">Caricamento...</span>
+            </div>
+            <p>Caricamento classifica...</p>
+        </div>
+    </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- React + ReactDOM (development, via CDN) -->
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+<!-- Babel standalone: transpila JSX inline nel browser -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!--
+    ═══════════════════════════════════════════════════════════════
+    Passa il torneoId da Thymeleaf a JavaScript.
+    Thymeleaf sostituisce /*[[...}]]*/ con il valore reale
+    prima che la pagina arrivi al browser.
+    ═══════════════════════════════════════════════════════════════
+-->
+<script th:inline="javascript">
+    const TORNEO_ID   = /*[[${torneoId}]]*/ 0;
+    const TORNEO_NOME = /*[[${torneo.nome}]]*/ '';
+</script>
+
+<!-- Componente React scritto in JSX (transpilato da Babel) -->
+<script type="text/babel">
+
+    // ── Componente badge posizione ────────────────────────────────────────
+    function PosBadge({ pos }) {
+        if (pos === 1) return <span className="badge fs-6 px-2 py-1 bg-warning text-dark">🥇</span>;
+        if (pos === 2) return <span className="badge fs-6 px-2 py-1 bg-secondary">🥈</span>;
+        if (pos === 3) return <span className="badge fs-6 px-2 py-1" style={{background:'#cd7f32'}}>🥉</span>;
+        return <span className="text-muted fw-semibold">{pos}</span>;
+    }
+
+    // ── Riga della classifica ─────────────────────────────────────────────
+    function RigaClassifica({ entry, pos }) {
+        const isFirst = pos === 1;
+        return (
+            <tr className={isFirst ? 'table-success fw-bold' : ''}>
+                <td className="text-center align-middle">
+                    <PosBadge pos={pos} />
+                </td>
+                <td className="align-middle">
+                    <i className="bi bi-shield-fill text-success me-2"></i>
+                    {entry.nomeSquadra}
+                </td>
+                <td className="text-center align-middle">{entry.partiteGiocate}</td>
+                <td className="text-center align-middle text-success fw-semibold">
+                    {entry.vittorie}
+                </td>
+                <td className="text-center align-middle text-secondary">
+                    {entry.pareggi}
+                </td>
+                <td className="text-center align-middle text-danger">
+                    {entry.sconfitte}
+                </td>
+                <td className="text-center align-middle">{entry.golFatti}</td>
+                <td className="text-center align-middle">{entry.golSubiti}</td>
+                <td className="text-center align-middle">
+                    <span className={entry.differenzaReti >= 0
+                        ? 'text-success fw-semibold'
+                        : 'text-danger fw-semibold'}>
+                        {entry.differenzaReti > 0 ? '+' : ''}{entry.differenzaReti}
+                    </span>
+                </td>
+                <td className="text-center align-middle">
+                    <span className="badge bg-success fs-6 px-2">
+                        {entry.punti}
+                    </span>
+                </td>
+            </tr>
+        );
+    }
+
+    // ── Legenda colonne ───────────────────────────────────────────────────
+    function Legenda() {
+        return (
+            <div className="text-muted small mt-3 d-flex flex-wrap gap-3">
+                <span><strong>PG</strong> Partite Giocate</span>
+                <span><strong>V</strong> Vittorie</span>
+                <span><strong>P</strong> Pareggi</span>
+                <span><strong>S</strong> Sconfitte</span>
+                <span><strong>GF</strong> Gol Fatti</span>
+                <span><strong>GS</strong> Gol Subiti</span>
+                <span><strong>DR</strong> Differenza Reti</span>
+                <span><strong>Pt</strong> Punti</span>
+            </div>
+        );
+    }
+
+    // ── Componente principale ─────────────────────────────────────────────
+    function ClassificaApp() {
+        const [classifica, setClassifica] = React.useState([]);
+        const [loading,    setLoading]    = React.useState(true);
+        const [error,      setError]      = React.useState(null);
+        const [lastUpdate, setLastUpdate] = React.useState(null);
+
+        // Funzione di fetch separata per poter fare refresh manuale
+        const fetchClassifica = React.useCallback(() => {
+            setLoading(true);
+            setError(null);
+            fetch(`/api/tornei/${TORNEO_ID}/classifica`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`Errore HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    setClassifica(data);
+                    setLastUpdate(new Date().toLocaleTimeString('it-IT'));
+                    setLoading(false);
+                })
+                .catch(err => {
+                    setError(err.message);
+                    setLoading(false);
+                });
+        }, []);
+
+        // Carica al mount
+        React.useEffect(() => {
+            fetchClassifica();
+        }, [fetchClassifica]);
+
+        // ── Stato: caricamento ───────────────────────────────────────────
+        if (loading) {
+            return (
+                <div className="text-center py-5 text-muted">
+                    <div className="spinner-border text-success mb-3" role="status">
+                        <span className="visually-hidden">Caricamento...</span>
+                    </div>
+                    <p>Caricamento classifica...</p>
+                </div>
+            );
+        }
+
+        // ── Stato: errore ────────────────────────────────────────────────
+        if (error) {
+            return (
+                <div className="alert alert-danger d-flex align-items-center gap-2">
+                    <i className="bi bi-exclamation-triangle-fill fs-4"></i>
+                    <div>
+                        <strong>Impossibile caricare la classifica.</strong>
+                        <br/><small>{error}</small>
+                    </div>
+                    <button className="btn btn-outline-danger btn-sm ms-auto"
+                            onClick={fetchClassifica}>
+                        <i className="bi bi-arrow-clockwise"></i> Riprova
+                    </button>
+                </div>
+            );
+        }
+
+        // ── Stato: nessuna partita giocata ───────────────────────────────
+        if (classifica.length === 0) {
+            return (
+                <div className="text-center text-muted py-5">
+                    <i className="bi bi-calendar-x display-1 d-block mb-3"></i>
+                    <p className="fs-5">Nessuna partita giocata ancora.</p>
+                    <p className="small">La classifica apparirà non appena verrà inserito il primo risultato.</p>
+                </div>
+            );
+        }
+
+        // ── Stato: classifica disponibile ────────────────────────────────
+        return (
+            <div>
+                {/* Info aggiornamento + pulsante refresh */}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <span className="text-muted small">
+                        <i className="bi bi-clock me-1"></i>
+                        Aggiornata alle {lastUpdate}
+                        &nbsp;·&nbsp;
+                        {classifica.length} squadre
+                    </span>
+                    <button className="btn btn-outline-success btn-sm"
+                            onClick={fetchClassifica}>
+                        <i className="bi bi-arrow-clockwise"></i> Aggiorna
+                    </button>
+                </div>
+
+                {/* Tabella classifica */}
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle classifica-table">
+                        <thead className="table-success">
+                            <tr>
+                                <th className="text-center" style={{width:'50px'}}>#</th>
+                                <th>Squadra</th>
+                                <th className="text-center">PG</th>
+                                <th className="text-center text-success">V</th>
+                                <th className="text-center text-secondary">P</th>
+                                <th className="text-center text-danger">S</th>
+                                <th className="text-center">GF</th>
+                                <th className="text-center">GS</th>
+                                <th className="text-center">DR</th>
+                                <th className="text-center">Pt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {classifica.map((entry, idx) => (
+                                <RigaClassifica
+                                    key={entry.squadraId}
+                                    entry={entry}
+                                    pos={idx + 1}
+                                />
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Legenda */}
+                <Legenda />
+            </div>
+        );
+    }
+
+    // ── Mount del componente React nel DOM ────────────────────────────────
+    const root = ReactDOM.createRoot(document.getElementById('classifica-root'));
+    root.render(<ClassificaApp />);
+
+</script>
+
+</body>
+</html>
