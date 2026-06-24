@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+/*
+netstat -ano | find "8080"
+tasklist /fi "PID eq [PID]"
+taskkill /F /PID [PID]
+*/
+
 
 /**
  * REST controller che espone i dati della classifica in formato JSON.
