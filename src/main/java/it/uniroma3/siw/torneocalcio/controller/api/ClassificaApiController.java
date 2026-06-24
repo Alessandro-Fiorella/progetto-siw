@@ -1,8 +1,10 @@
 package it.uniroma3.siw.torneocalcio.controller.api;
 
 import it.uniroma3.siw.torneocalcio.service.PartitaService;
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClassificaApiController {
 
-    private final PartitaService partitaService;
+    @Autowired PartitaService partitaService;
 
     @GetMapping("/tornei/{torneoId}/classifica")
     public ResponseEntity<List<PartitaService.ClassificaEntry>> getClassifica(
