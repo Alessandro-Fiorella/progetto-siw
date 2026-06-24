@@ -41,4 +41,5 @@ public class Squadra {
     @ManyToMany(mappedBy = "squadre", fetch = FetchType.LAZY)
     private Set<Torneo> tornei = new HashSet<>();
 
+
 }

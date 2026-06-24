@@ -49,4 +49,5 @@ public class Torneo {
      */
     @OneToMany(mappedBy = "torneo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Partita> partite = new ArrayList<>();
+
 }

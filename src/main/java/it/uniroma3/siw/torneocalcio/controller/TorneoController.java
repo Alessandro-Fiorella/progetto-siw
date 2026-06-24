@@ -4,7 +4,6 @@ import it.uniroma3.siw.torneocalcio.model.Torneo;
 import it.uniroma3.siw.torneocalcio.repository.TorneoRepository;
 import it.uniroma3.siw.torneocalcio.service.SquadraService;
 import it.uniroma3.siw.torneocalcio.service.TorneoService;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,15 +14,19 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/tornei")
-@RequiredArgsConstructor
 public class TorneoController {
 
     private final TorneoRepository torneoRepository;
-    @Autowired TorneoService  torneoService;
-    @Autowired SquadraService squadraService;
+    private final TorneoService torneoService;
+    private final SquadraService squadraService;
 
-    TorneoController(TorneoRepository torneoRepository) {
+    @Autowired
+    public TorneoController(TorneoRepository torneoRepository,
+                            TorneoService torneoService,
+                            SquadraService squadraService) {
         this.torneoRepository = torneoRepository;
+        this.torneoService = torneoService;
+        this.squadraService = squadraService;
     }
 
     /* ── Pubblico ──────────────────────────────────────────────────────── */
