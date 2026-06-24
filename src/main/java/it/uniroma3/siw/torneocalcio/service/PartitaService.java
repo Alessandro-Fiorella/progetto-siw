@@ -127,9 +127,10 @@ public class PartitaService {
 
         List<ClassificaEntry> classifica = new ArrayList<>(mappa.values());
         classifica.sort(
-            Comparator.comparingInt(ClassificaEntry::getPunti).reversed()
-                .thenComparingInt(ClassificaEntry::getDifferenzaReti).reversed()
-                .thenComparingInt(ClassificaEntry::getGolFatti).reversed()
+            Comparator.comparingInt(ClassificaEntry::getPunti)
+            .thenComparingInt(ClassificaEntry::getDifferenzaReti)
+            .thenComparingInt(ClassificaEntry::getGolFatti)
+            .reversed() // Inverte l'intera catena in un colpo solo
         );
         return classifica;
     }
