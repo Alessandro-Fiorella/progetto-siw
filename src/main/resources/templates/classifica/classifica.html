@@ -73,6 +73,14 @@
 <!-- Babel standalone: transpila JSX inline nel browser -->
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+<script>
+    Babel.registerPreset('my-react-classic', {
+        presets: [
+            [Babel.availablePresets['react'], { "runtime": "classic" }]
+        ]
+    });
+</script>
+
 <!--
     ═══════════════════════════════════════════════════════════════
     Passa il torneoId da Thymeleaf a JavaScript.
@@ -86,8 +94,8 @@
 </script>
 
 <!-- Componente React scritto in JSX (transpilato da Babel) -->
-<script type="text/babel">
-
+<script type="text/babel" data-presets="env, my-react-classic">
+    
     // ── Componente badge posizione ────────────────────────────────────────
     function PosBadge({ pos }) {
         if (pos === 1) return <span className="badge fs-6 px-2 py-1 bg-warning text-dark">🥇</span>;
