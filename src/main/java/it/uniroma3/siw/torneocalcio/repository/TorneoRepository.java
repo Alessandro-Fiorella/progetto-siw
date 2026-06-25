@@ -1,6 +1,8 @@
 package it.uniroma3.siw.torneocalcio.repository;
 
 import it.uniroma3.siw.torneocalcio.model.Torneo;
+
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,4 +38,13 @@ public interface TorneoRepository extends JpaRepository<Torneo, Long> {
            "LEFT JOIN FETCH t.squadre " +
            "WHERE t.id = :id")
     Optional<Torneo> findByIdWithSquadre(@Param("id") Long id);
+
+    /**
+     * OTTIMIZZAZIONE ALTERNATIVA: EntityGraph
+     * Dice a Hibernate di caricare dinamicamente la relazione "squadre" 
+     * tramite un LEFT OUTER JOIN, mantenendo la query di base pulita.
+     */
+    @EntityGraph(attributePaths = {"squadre"})
+    @Query("SELECT t FROM Torneo t")
+    List<Torneo> findAllWithEntityGraph();
 }
